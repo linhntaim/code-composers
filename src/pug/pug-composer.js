@@ -24,9 +24,13 @@ export class PugComposer extends Composer {
     }
 
     traverseNode(node, level = 0, previousNode = null, nextNode = null) {
-        switch (node.name) {
+        switch (node.nodeName) {
             case '#document':
-                this.traverseChildNodes(node, 0)
+            case '#document-fragment':
+                this.traverseChildNodes(node, level - 1)
+                break
+            case '#documentType':
+                this.printDocumentTypeNode(node, level)
                 break
             case '#text':
                 this.printTextNode(node, level, previousNode, nextNode)
@@ -41,10 +45,46 @@ export class PugComposer extends Composer {
         return this
     }
 
+    traverseChildNodes(node, level) {
+        node.childNodes.forEach((childNode, index) => this.traverseNode(
+            childNode,
+            level + 1,
+            index ? node.childNodes[index - 1] : null,
+            index < node.childNodes.length - 1 ? node.childNodes[index + 1] : null,
+        ))
+        return this
+    }
+
+    printDocumentTypeNode(node, level) {
+        this.lines.push(this.printDocumentTypeLine(node, level))
+        return this
+    }
+
+    printDocumentTypeLine(node, level) {
+        return this.printSpace(level) + this.printDocumentType(node)
+    }
+
+    printDocumentType(node) {
+        return [
+            'doctype',
+            node.name,
+            node.publicId ? 'PUBLIC' : '',
+            node.publicId,
+            node.systemId,
+        ].filter(item => !!item.trim()).join(' ')
+    }
+
     printTextNode(node, level, previousNode = null, nextNode = null) {
         if (node.value.trim() === ''
-            && previousNode && 'tagName' in previousNode
-            && nextNode && 'tagName' in nextNode) {
+            && (
+                (previousNode && 'tagName' in previousNode
+                    && nextNode && 'tagName' in nextNode)
+                || (previousNode && 'tagName' in previousNode
+                    && !nextNode)
+                || (!previousNode
+                    && nextNode && 'tagName' in nextNode)
+            )
+        ) {
             return this
         }
         this.printTextNodeLine(
@@ -52,38 +92,28 @@ export class PugComposer extends Composer {
             level,
             !previousNode || !('tagName' in previousNode),
             !nextNode || !('tagName' in nextNode),
-        ).forEach(line => {
-            console.log(line)
-            this.lines.push(line)
-        })
+        ).forEach(line => this.lines.push(line))
         return this
     }
 
     printCommentNode(node, level) {
-        this.printCommentNodeLine(node, level).forEach(line => {
-            console.log(line)
-            this.lines.push(line)
-        })
+        this.printCommentNodeLine(node, level).forEach(line => this.lines.push(line))
         return this
     }
 
     printTagNode(node, level) {
-        const line = this.printTagNodeLine(node, level)
-        console.log(line)
-        this.lines.push(line)
+        this.lines.push(
+            this.printTagNodeLine(node, level),
+        )
         return this
     }
 
     printTextNodeLine(node, level, trimSpaceLeft = false, trimSpaceRight = false) {
-        return this.printText(node, trimSpaceLeft, trimSpaceRight).map(text => {
-            return this.printSpace(level) + text
-        })
+        return this.printText(node, trimSpaceLeft, trimSpaceRight).map(text => this.printSpace(level) + text)
     }
 
     printCommentNodeLine(node, level) {
-        return this.printComment(node).map(text => {
-            return this.printSpace(level) + text
-        })
+        return this.printComment(node).map(text => this.printSpace(level) + text)
     }
 
     printTagNodeLine(node, level) {
@@ -95,7 +125,7 @@ export class PugComposer extends Composer {
     }
 
     printText(node, trimSpaceLeft = true, trimSpaceRight = true) {
-        return node.value.trim().split(/\r*\n|\r/).map(text => {
+        return (text => {
             if (trimSpaceLeft && trimSpaceRight) {
                 text = text.trim()
             } else if (trimSpaceLeft) {
@@ -103,14 +133,14 @@ export class PugComposer extends Composer {
             } else if (trimSpaceRight) {
                 text = text.replace(/\s+$/, '')
             }
+            return text
+        })(node.value).split(/\r*\n|\r/).map(text => {
             return '| ' + text
         })
     }
 
     printComment(node) {
-        return node.value.trim().split(/\r*\n|\r/).map(comment => {
-            return '// ' + comment.trim()
-        })
+        return node.value.trim().split(/\r*\n|\r/).map(comment => '// ' + comment.trim())
     }
 
     printTag(node) {
@@ -150,13 +180,7 @@ export class PugComposer extends Composer {
         return attribute.name + '="' + attribute.value + '"'
     }
 
-    traverseChildNodes(node, level = 1) {
-        node.childNodes.forEach((childNode, index) => this.traverseNode(
-            childNode,
-            level + 1,
-            index ? node.childNodes[index - 1] : null,
-            index < node.childNodes.length - 1 ? node.childNodes[index + 1] : null,
-        ))
-        return this
+    composedFileExtension() {
+        return 'pug'
     }
 }

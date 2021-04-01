@@ -6,7 +6,8 @@
     "scripts": {
         "build": "babel src --out-dir ./dist --delete-dir-on-start --minified --source-maps",
         "test": "nyc mocha --require @babel/register",
-        "coverage": "nyc report --reporter=text-lcov | coveralls"
+        "coverage": "nyc report --reporter=text-lcov | coveralls",
+        "cli": "node dist/cli.js"
     },
     "repository": {
         "type": "git",
@@ -34,6 +35,7 @@
         "nyc": "^15.1.0"
     },
     "dependencies": {
-        "parse5": "^6.0.1"
+        "parse5": "^6.0.1",
+        "yargs": "^16.2.0"
     }
 }

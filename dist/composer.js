@@ -1,0 +1,11 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:true});exports.Composer=void 0;var _fs=_interopRequireDefault(require("fs"));var _path=_interopRequireDefault(require("path"));function _interopRequireDefault(obj){return obj&&obj.__esModule?obj:{"default":obj}}function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function")}}function _defineProperties(target,props){for(var i=0;i<props.length;i++){var descriptor=props[i];descriptor.enumerable=descriptor.enumerable||false;descriptor.configurable=true;if("value"in descriptor)descriptor.writable=true;Object.defineProperty(target,descriptor.key,descriptor)}}function _createClass(Constructor,protoProps,staticProps){if(protoProps)_defineProperties(Constructor.prototype,protoProps);if(staticProps)_defineProperties(Constructor,staticProps);return Constructor}var Composer=/*#__PURE__*/function(){function Composer(){_classCallCheck(this,Composer)}_createClass(Composer,[{key:"compose",value:/**
+     *
+     * @param {String} content
+     * @return {String}
+     */function compose(content){return content}/**
+     *
+     * @param {String} inFile
+     * @param {String} outFile
+     * @return {Composer|*}
+     */},{key:"composeFile",value:function composeFile(inFile){var outFile=arguments.length>1&&arguments[1]!==undefined?arguments[1]:"";inFile=inFile?inFile.trim():"";if(!inFile){throw"Source is undefined."}if(!_fs["default"].existsSync(inFile)){throw"Source ["+inFile+"] does not exist."}outFile=outFile?outFile.trim():"";if(!outFile){outFile=inFile+"."+this.composedFileExtension()}var dir=_path["default"].dirname(outFile);if(!_fs["default"].existsSync(dir)){_fs["default"].mkdirSync(dir,{recursive:true})}_fs["default"].writeFileSync(outFile,this.compose(_fs["default"].readFileSync(inFile).toString("utf8")));return this}},{key:"composedFileExtension",value:function composedFileExtension(){return"composed"}}]);return Composer}();exports.Composer=Composer;
+//# sourceMappingURL=composer.js.map

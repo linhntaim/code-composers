@@ -1,0 +1,2 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:true});Object.defineProperty(exports,"PugComposer",{enumerable:true,get:function get(){return _pug.PugComposer}});Object.defineProperty(exports,"Composer",{enumerable:true,get:function get(){return _composer.Composer}});var _pug=require("./pug");var _composer=require("./composer");
+//# sourceMappingURL=index.js.map
